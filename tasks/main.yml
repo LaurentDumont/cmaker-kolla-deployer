@@ -1,0 +1,3 @@
+---
+
+- include: prepare_control_host.yml

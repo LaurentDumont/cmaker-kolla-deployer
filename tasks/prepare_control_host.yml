@@ -1,0 +1,57 @@
+---
+
+- name: Ensure that the base packages for Kolla are present on the deployer.
+  package:
+    name: "{{ default_kolla_packages }}"
+    state: present
+
+- name: Ensure virtualenv is present and packages are installed on the deployer.
+  pip:
+    virtualenv: /home/{{ control_user }}/kolla-venv
+    name: "{{ python_kolla_packages }}"
+    state: latest
+
+- name: Ensure folders for Kolla are present on the deployer.
+  file:
+    state: directory
+    path: /etc/kolla
+
+- name: Create the fact folder for Kolla on the deployer.
+  file:
+    state: directory
+    path: /etc/kolla/facts
+
+- name: Ensure that the Ansible folder is present on the deployer.
+  file:
+    state: directory
+    path: /etc/ansible
+
+- name: Ensure that the Ansible configuration file is present on the deployer.
+  template:
+    src: ansible/ansible.cfg.j2
+    dest: /etc/ansible/ansible.cfg
+
+- name: Ensure that the Kolla global config file is present on the deployer.
+  copy:
+    src: globals.yml
+    dest: /etc/kolla/
+
+- name: Ensure Kolla templates files are present on the deployer.
+  template:
+    src: "{{ item }}"
+    dest: /etc/kolla/{{ item | basename | regex_replace('\.j2','') }}
+    force: no
+  with_fileglob:
+    - "templates/kolla/*"
+
+- name: Generate the passwords for Kolla.
+  command: /home/root/kolla-venv/bin/kolla-genpwd
+  args:
+    creates: /etc/kolla/facts/kolla_passwords_generated
+
+- name: Create the state for the Kolla password generation.
+  file:
+    state: touch
+    path: /etc/kolla/facts/kolla_passwords_generated
+    modification_time: preserve
+    access_time: preserve

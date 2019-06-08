@@ -1,0 +1,16 @@
+---
+control_user: root
+default_kolla_packages:
+  - epel-release
+  - python-devel 
+  - libffi-devel
+  - gcc
+  - openssl-devel 
+  - libselinux-python
+  - python-virtualenv
+python_kolla_packages:
+  - ansible
+  - kolla-ansible
+ansible_forks: 100
+ansible_host_key_checking: False
+ansible_pipelining: True
